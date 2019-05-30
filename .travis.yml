@@ -1,0 +1,13 @@
+language: c
+
+os: linux
+dist: xenial
+sudo: required
+
+services: docker
+
+install:
+  - docker pull devkitpro/devkitarm
+
+script:
+  - docker run -e ENABLE_COMPATIBILITY_REPORTING -v $TRAVIS_BUILD_DIR:/3DS.py devkitpro/devkitarm /bin/bash -ex /3DS.py/.ci/docker.sh
