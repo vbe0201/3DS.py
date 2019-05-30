@@ -14,8 +14,8 @@
 # This is the entrypoint to your cool Python homebrew application!
 #
 # Just write some code.
-# Place this file in the same directory where your Py3DS
-# executable is located and run 3DS.py.
+# Place this file in the same directory where your 3DS.py
+# executable is located and launch the app.
 #
 
 if __name__ == '__main__':
