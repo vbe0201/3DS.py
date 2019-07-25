@@ -46,6 +46,8 @@ to the 3DS.
 * [Fenrir][fenrirwolf] for his support and the [ctru-rs][ctru-rs] project
 that helped me out with the condition variables implementation.
 
+* [Richard Caseres][richardbmx] for the awesome app icon he designed.
+
 [cpython]: https://github.com/python/cpython/tree/3.6
 [devkitarm]: https://www.3dbrew.org/wiki/Setting_up_Development_Environment
 [3dbrew]: https://www.3dbrew.org
@@ -55,3 +57,4 @@ that helped me out with the condition variables implementation.
 [david buchanan]: https://github.com/DavidBuchanan314
 [fenrirwolf]: https://github.com/FenrirWolf
 [ctru-rs]: https://github.com/rust3ds/ctru-rs
+[richardbmx]: https://github.com/richardbmx
