@@ -70,7 +70,7 @@ distPython: makePython
 	cp $(ANAME) $(OUTDIR)/lib
 	cp -r $(PYDIR)/Include/* $(OUTDIR)/include
 	cp $(PYDIR)/pyconfig.h $(OUTDIR)/include
-	zip -r $(OUTDIR)/python_lib.zip $(PYDIR)/Lib/
+	cd $(PYDIR)/Lib && zip -r ../../$(OUTDIR)/python_lib.zip .
 
 makePython: patchPython
 	cd $(PYDIR) && \

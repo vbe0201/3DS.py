@@ -123,7 +123,7 @@ endif
 #---------------------------------------------------------------------------------
 clean:
 	$(MAKE) -C $(INTERPRETER) clean
-	@rm -fr $(BUILD) $(OUTPUT).3dsx $(OUTPUT).smdh $(OUTPUT).elf
+	@rm -fr $(BUILD) $(OUTPUT).3dsx $(OUTPUT).smdh $(OUTPUT).elf $(OUTPUT)-$(APP_VERSION)*
 
 #---------------------------------------------------------------------------------
 else
