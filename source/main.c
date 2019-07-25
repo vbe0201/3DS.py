@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
     gfxInitDefault();
     gfxSet3D(false);
     consoleInit(GFX_TOP, NULL);
-    consoleInit(GFX_BOTTOM, NULL);
 
     #ifdef _3DS_PY_DEBUG
     consoleDebugInit(debugDevice_CONSOLE);
