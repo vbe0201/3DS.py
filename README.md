@@ -11,7 +11,14 @@ _Place a cool picture here later._
 
 ## Installation & Usage
 
-_Coming soon._
+Just grab one of the releases [over here][releases] and unzip it. Copy the entire `3DS.py`
+folder to the `3ds` directory of your SD card and navigate into it. You should
+see a `3DS.py.3dsx` application.
+
+The same directory also contains the entire Python standard library and a `main.py` file.
+To run your own projects, copy all source files into the `3DS.py` directory and "start"
+your application from within the `main.py` file as this is the entry point to any Python
+homebrew.
 
 ## Compiling
 
@@ -49,6 +56,7 @@ that helped me out with the condition variables implementation.
 * [Richard Caseres][richardbmx] for the awesome app icon he designed.
 
 [cpython]: https://github.com/python/cpython/tree/3.6
+[releases]: https://github.com/vbe0201/3DS.py/releases
 [devkitarm]: https://www.3dbrew.org/wiki/Setting_up_Development_Environment
 [3dbrew]: https://www.3dbrew.org
 [devkitpro]: https://devkitpro.org
