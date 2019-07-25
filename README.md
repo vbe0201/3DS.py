@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/vbe0201/3DS.py.svg?branch=master)](https://travis-ci.org/vbe0201/3DS.py)
 
-3DS.py is a WIP port of the [Python 3.6.8 interpreter][cpython] to the Nintendo 3DS.
+3DS.py is a WIP port of the [Python 3.6.9 interpreter][cpython] to the Nintendo 3DS.
 It allows you to run your Python scripts directly on the 3DS by having the interpreter
 embedded into a homebrew application that launches a `main.py` script from the same
 directory.

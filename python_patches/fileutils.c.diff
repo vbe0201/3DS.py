@@ -1,0 +1,26 @@
+*** interpreter/Python-3.6.9/Python/fileutils.c	2019-07-02 22:25:39.000000000 +0200
+--- python_patches/fileutils.c	2019-07-25 16:55:21.764332548 +0200
+***************
+*** 830,835 ****
+--- 830,837 ----
+      }
+  
+      return (flags & HANDLE_FLAG_INHERIT);
++ #elif defined(_3DS)
++     return 1; /* Always true */
+  #else
+      int flags;
+  
+***************
+*** 870,875 ****
+--- 872,881 ----
+      int res;
+  #endif
+  
++ #ifdef _3DS
++     return 0; /* Always ok */
++ #endif
++ 
+      /* atomic_flag_works can only be used to make the file descriptor
+         non-inheritable */
+      assert(!(atomic_flag_works != NULL && inheritable));

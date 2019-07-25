@@ -1,40 +1,61 @@
---- interpreter/Python-3.6.8/Python/thread.c	2018-12-23 22:37:14.000000000 +0100
-+++ python_patches/thread.c	2019-05-25 14:11:01.474048615 +0200
-@@ -91,6 +91,11 @@
- #include "thread_nt.h"
- #endif
- 
-+#ifdef _3DS
-+#define PYTHREAD_NAME "ctr"
-+#include "thread_ctr.h"
-+#endif
-+
- 
- /*
- #ifdef FOOBAR_THREADS
-@@ -382,7 +387,8 @@
-     3
- };
- 
--static PyTypeObject ThreadInfoType;
-+/* Conflicts with ThreadInfoType from libctru/include/3ds/synchronization.h. */
-+static PyTypeObject _ThreadInfoType;
- 
- PyObject*
- PyThread_GetInfo(void)
-@@ -395,12 +401,12 @@
-     int len;
- #endif
- 
--    if (ThreadInfoType.tp_name == 0) {
--        if (PyStructSequence_InitType2(&ThreadInfoType, &threadinfo_desc) < 0)
-+    if (_ThreadInfoType.tp_name == 0) {
-+        if (PyStructSequence_InitType2(&_ThreadInfoType, &threadinfo_desc) < 0)
-             return NULL;
-     }
- 
--    threadinfo = PyStructSequence_New(&ThreadInfoType);
-+    threadinfo = PyStructSequence_New(&_ThreadInfoType);
-     if (threadinfo == NULL)
-         return NULL;
- 
+*** interpreter/Python-3.6.9/Python/thread.c	2019-07-02 22:25:39.000000000 +0200
+--- python_patches/thread.c	2019-07-25 21:38:19.127631675 +0200
+***************
+*** 91,96 ****
+--- 91,101 ----
+  #include "thread_nt.h"
+  #endif
+  
++ #ifdef _3DS
++ #define PYTHREAD_NAME "ctr"
++ #include "thread_ctr.h"
++ #endif
++ 
+  
+  /*
+  #ifdef FOOBAR_THREADS
+***************
+*** 382,388 ****
+      3
+  };
+  
+! static PyTypeObject ThreadInfoType;
+  
+  PyObject*
+  PyThread_GetInfo(void)
+--- 387,394 ----
+      3
+  };
+  
+! /* Conflicts with ThreadInfoType from libctru/include/3ds/synchronization.h. */
+! static PyTypeObject _ThreadInfoType;
+  
+  PyObject*
+  PyThread_GetInfo(void)
+***************
+*** 395,406 ****
+      int len;
+  #endif
+  
+!     if (ThreadInfoType.tp_name == 0) {
+!         if (PyStructSequence_InitType2(&ThreadInfoType, &threadinfo_desc) < 0)
+              return NULL;
+      }
+  
+!     threadinfo = PyStructSequence_New(&ThreadInfoType);
+      if (threadinfo == NULL)
+          return NULL;
+  
+--- 401,412 ----
+      int len;
+  #endif
+  
+!     if (_ThreadInfoType.tp_name == 0) {
+!         if (PyStructSequence_InitType2(&_ThreadInfoType, &threadinfo_desc) < 0)
+              return NULL;
+      }
+  
+!     threadinfo = PyStructSequence_New(&_ThreadInfoType);
+      if (threadinfo == NULL)
+          return NULL;
+  

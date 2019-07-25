@@ -1,62 +1,73 @@
---- interpreter/Python-3.6.8/Python/pytime.c	2018-12-23 22:37:14.000000000 +0100
-+++ python_patches/pytime.c	2019-05-30 14:37:30.188161349 +0200
-@@ -7,6 +7,11 @@
- #include <mach/mach_time.h>   /* mach_absolute_time(), mach_timebase_info() */
- #endif
- 
-+#ifdef _3DS
-+#include "3ds/os.h"
-+#include "3ds/types.h"
-+#endif
-+
- #define _PyTime_check_mul_overflow(a, b) \
-     (assert(b > 0), \
-      (_PyTime_t)(a) < _PyTime_MIN / (_PyTime_t)(b) \
-@@ -587,7 +592,22 @@
-         info->adjustable = 1;
-     }
- 
--#else   /* MS_WINDOWS */
-+#elif defined(_3DS)
-+
-+    u64 time;
-+
-+    assert(info == NULL || raise);
-+
-+    time = osGetTime();
-+
-+    if (info) {
-+        info->implementation = "osGetTime()";
-+        info->resolution = 1e-6;
-+        info->monotonic = 0;
-+        info->adjustable = 1;
-+    }
-+
-+#else   /* MS_WINDOWS && _3DS */
-     int err;
- #ifdef HAVE_CLOCK_GETTIME
-     struct timespec ts;
-@@ -726,6 +746,23 @@
-         info->monotonic = 1;
-         info->adjustable = 0;
-     }
-+
-+#elif defined(_3DS)
-+
-+    u64 time;
-+
-+    assert(info == NULL || raise);
-+
-+    time = osGetTime();
-+    *tp = time * MS_TO_NS;
-+
-+    if (info) {
-+        info->implementation = "osGetTime()";
-+        // TODO: Fix this. I don't even know what resolution is supposed to be.
-+        info->resolution = 1e-6;
-+        info->monotonic = 1;
-+        info->adjustable = 0;
-+    }
- 
- #else
-     struct timespec ts;
+*** interpreter/Python-3.6.9/Python/pytime.c	2019-07-02 22:25:39.000000000 +0200
+--- python_patches/pytime.c	2019-07-25 18:23:21.420988765 +0200
+***************
+*** 7,12 ****
+--- 7,17 ----
+  #include <mach/mach_time.h>   /* mach_absolute_time(), mach_timebase_info() */
+  #endif
+  
++ #ifdef _3DS
++ #include "3ds/os.h"
++ #include "3ds/types.h"
++ #endif
++ 
+  #define _PyTime_check_mul_overflow(a, b) \
+      (assert(b > 0), \
+       (_PyTime_t)(a) < _PyTime_MIN / (_PyTime_t)(b) \
+***************
+*** 587,593 ****
+          info->adjustable = 1;
+      }
+  
+! #else   /* MS_WINDOWS */
+      int err;
+  #ifdef HAVE_CLOCK_GETTIME
+      struct timespec ts;
+--- 592,613 ----
+          info->adjustable = 1;
+      }
+  
+! #elif defined(_3DS)
+! 
+!     u64 time;
+! 
+!     assert(info == NULL || raise);
+! 
+!     time = osGetTime();
+! 
+!     if (info) {
+!         info->implementation = "osGetTime()";
+!         info->resolution = 1e-6;
+!         info->monotonic = 0;
+!         info->adjustable = 1;
+!     }
+! 
+! #else   /* MS_WINDOWS && _3DS */
+      int err;
+  #ifdef HAVE_CLOCK_GETTIME
+      struct timespec ts;
+***************
+*** 726,731 ****
+--- 746,767 ----
+          info->monotonic = 1;
+          info->adjustable = 0;
+      }
++ 
++ #elif defined(_3DS)
++ 
++     u64 time;
++ 
++     assert(info == NULL || raise);
++ 
++     time = osGetTime();
++     *tp = time * MS_TO_NS;
++ 
++     if (info) {
++         info->implementation = "osGetTime()";
++         info->resolution = time / 1e+3 + time * 1e-9;
++         info->monotonic = 1;
++         info->adjustable = 0;
++     }
+  
+  #else
+      struct timespec ts;

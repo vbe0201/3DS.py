@@ -44,7 +44,7 @@ export INCLUDE := $(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 CFLAGS   += $(INCLUDE) -DARM11 -D_3DS -DWITH_THREAD
 
 ifeq ($(strip $(PYVERSION)),)
-	PYVERSION := 3.6.8
+	PYVERSION := 3.6.9
 endif
 
 ANAME     := libpython$(shell echo $(PYVERSION) | cut -b 1-3).a
@@ -70,10 +70,7 @@ distPython: makePython
 	cp $(ANAME) $(OUTDIR)/lib
 	cp -r $(PYDIR)/Include/* $(OUTDIR)/include
 	cp $(PYDIR)/pyconfig.h $(OUTDIR)/include
-	cd $(PYDIR)/Lib && \
-	ls *.py -1 | xargs zip ../../$(OUTDIR)/python_lib.zip && \
-	  find asyncio/ collections/ email/ encodings/ html/ http/ importlib/ json/ logging/ sqlite3/ test/ urllib/ xml/ -type f \
-	  | xargs zip ../../$(OUTDIR)/python_lib.zip
+	zip -r $(OUTDIR)/python_lib.zip $(PYDIR)/Lib/
 
 makePython: patchPython
 	cd $(PYDIR) && \
@@ -82,10 +79,11 @@ makePython: patchPython
 	cp $(PYDIR)/$(ANAME) .
 
 patchPython: configurePython
-	cp $(PATCH_DIR)/condvars_ctr.h $(PYDIR)/Python/condvars_ctr.h
-	cp $(PATCH_DIR)/thread_ctr.h $(PYDIR)/Python/thread_ctr.h
+	cp $(PATCH_DIR)/condvars_ctr.h $(PYDIR)/Python/
+	cp $(PATCH_DIR)/thread_ctr.h $(PYDIR)/Python/
+	patch $(PYDIR)/Python/fileutils.c $(PATCH_DIR)/fileutils.c.diff
 	patch $(PYDIR)/pyconfig.h $(PATCH_DIR)/pyconfig.h.diff
-	patch --ignore-whitespace $(PYDIR)/Makefile $(PATCH_DIR)/Makefile.diff
+	patch $(PYDIR)/Makefile $(PATCH_DIR)/Makefile.diff
 	patch $(PYDIR)/Modules/posixmodule.c $(PATCH_DIR)/posixmodule.c.diff
 	patch $(PYDIR)/Python/ceval_gil.h $(PATCH_DIR)/ceval_gil.h.diff
 	patch $(PYDIR)/Python/condvar.h $(PATCH_DIR)/condvar.h.diff
@@ -99,15 +97,13 @@ configurePython: preparePython
 	cd $(PYDIR) && \
 	./configure CC="$(CC)" CXX="$(CXX)" AS="$(AS)" AR="$(AR)" OBJCOPY="$(OBJCOPY)" STRIP="$(STRIP)" NM="$(NM)" RANLIB="$(RANLIB)" \
 	  CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" ASFLAGS="$(ASFLAGS)" LDFLAGS="$(LDFLAGS)" CONFIG_SITE=config.site \
-	  --without-doc-strings --disable-shared --disable-ipv6 --host=arm-none-eabi --build=`./config.guess` && \
+	  --enable-optimizations --without-doc-strings --disable-shared --disable-ipv6 --host=arm-none-eabi --build=`./config.guess` && \
 	cd ..
 
 preparePython: $(PYDIR)
 	$(SED) -i -e 's/\*\-\*\-linux\*)/\*\-\*\-linux\*\|arm\-none\-eabi)/g' $(PYDIR)/configure
-	echo "ac_cv_file__dev_ptmx=no" >$(PYDIR)/config.site
-	echo "ac_cv_file__dev_ptc=no" >>$(PYDIR)/config.site
-	echo "ac_cv_lib_dl_dlopen=no" >>$(PYDIR)/config.site
-	cp $(PATCH_DIR)/Setup.dist $(PYDIR)/Modules/Setup.dist
+	cp $(PATCH_DIR)/config.site $(PYDIR)/
+	cp $(PATCH_DIR)/Setup.dist $(PYDIR)/Modules/
 
 $(PYDIR):
 	wget $(PYURL) || curl -L $(PYURL)
