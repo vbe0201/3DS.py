@@ -33,7 +33,7 @@ INCLUDES        := include
 APP_TITLE       := $(TARGET)
 APP_DESCRIPTION := Python on the 3DS
 APP_AUTHOR      := Valentin B., Python Software Foundation
-APP_VERSION     := 0.0.1
+APP_VERSION     := 0.1.0
 ICON            := $(TOPDIR)/icon.png
 DIST_DIR        := $(TARGET)-$(APP_VERSION)
 
