@@ -34,7 +34,7 @@ APP_TITLE       := $(TARGET)
 APP_DESCRIPTION := Python on the 3DS
 APP_AUTHOR      := Valentin B., Python Software Foundation
 APP_VERSION     := 0.1.0
-ICON            := $(TOPDIR)/icon.png
+ICON            := logo.png
 DIST_DIR        := $(TARGET)-$(APP_VERSION)
 
 #---------------------------------------------------------------------------------
@@ -66,6 +66,8 @@ LIBDIRS  := $(PORTLIBS) $(CTRULIB) $(TOPDIR)/$(BUILD)/libpython
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
+
+export APP_ICON := $(TOPDIR)/$(ICON)
 
 export OUTPUT   := $(CURDIR)/$(TARGET)
 export TOPDIR   := $(CURDIR)
