@@ -36,6 +36,15 @@ If you're on macOS, make sure to have gnu-sed installed. `brew install gnu-sed`
 A list of cool homebrew projects that make use of 3DS.py.
 Want yours to be listed here? PR them.
 
+## Development & Support
+
+Need help? Or want to have an active voice in development of and around this project?
+Then join our [Discord guild][discord] which focusses on homebrew development for the
+Nintendo 3DS in Python.
+
+This way, things can be discussed more directly and you'll likely get answfers to your
+questions faster than through GitHub issues.
+
 ## Special thanks
 
 In no particular order, I want to credit these amazing people for
@@ -58,6 +67,7 @@ that helped me out with the condition variables implementation.
 [cpython]: https://github.com/python/cpython/tree/3.6
 [releases]: https://github.com/vbe0201/3DS.py/releases
 [devkitarm]: https://www.3dbrew.org/wiki/Setting_up_Development_Environment
+[discord]: https://discord.gg/PSjzVp8
 [3dbrew]: https://www.3dbrew.org
 [devkitpro]: https://devkitpro.org
 [smealum]: https://github.com/smealum
