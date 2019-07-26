@@ -7,7 +7,7 @@ It allows you to run your Python scripts directly on the 3DS by having the inter
 embedded into a homebrew application that launches a `main.py` script from the same
 directory.
 
-_Place a cool picture here later._
+![3DS.py in action](./.github/showcase.jpg)
 
 ## Installation & Usage
 
