@@ -182,6 +182,9 @@ _bisect _bisectmodule.c	# Bisection algorithms
 _heapq _heapqmodule.c	# Heap queue algorithm
 _asyncio _asynciomodule.c  # Fast asyncio Future
 
+# Low-level bindings to ctrulib for writing ARM11 userland code (3DS only).
+_ctru -I$(srcdir)/Modules/_ctru _ctru/_ctrumodule.c hashtable.c
+
 unicodedata unicodedata.c    # static Unicode character database
 
 

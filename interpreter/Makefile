@@ -103,6 +103,7 @@ configurePython: preparePython
 preparePython: $(PYDIR)
 	$(SED) -i -e 's/\*\-\*\-linux\*)/\*\-\*\-linux\*\|arm\-none\-eabi)/g' $(PYDIR)/configure
 	cp $(PATCH_DIR)/config.site $(PYDIR)/
+	cp -r $(PATCH_DIR)/_ctru/ $(PYDIR)/Modules/
 	cp $(PATCH_DIR)/Setup.dist $(PYDIR)/Modules/
 
 $(PYDIR):
