@@ -64,7 +64,7 @@
 + 
 +     if (info) {
 +         info->implementation = "osGetTime()";
-+         info->resolution = time / 1e+3 + time * 1e-9;
++         info->resolution = time / 1e+3 + time * 1e-3;
 +         info->monotonic = 1;
 +         info->adjustable = 0;
 +     }
