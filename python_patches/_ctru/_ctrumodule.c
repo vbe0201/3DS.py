@@ -11,6 +11,212 @@
 PyDoc_STRVAR(_ctru__doc__,
 "Low-level Python bindings to smea's ctrulib.\n");
 
+/* ac */
+
+PyDoc_STRVAR(_ctru_ac_init__doc__,
+"Initializes AC.");
+
+static PyObject *
+_ctru_ac_init(PyObject *self, PyObject *args)
+{
+    Result result;
+
+    result = acInit();
+    _CTRU_ASSERT_IPC_OK(result);
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(_ctru_ac_exit__doc__,
+"Exits AC.");
+
+static PyObject *
+_ctru_ac_exit(PyObject *self, PyObject *args)
+{
+    acExit();
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(_ctru_ac_wait_internet_connection__doc__,
+"Waits for the system to connect to the internet.");
+
+static PyObject *
+_ctru_ac_wait_internet_connection(PyObject *self, PyObject *args)
+{
+    Result result;
+
+    result = acWaitInternetConnection();
+    _CTRU_ASSERT_IPC_OK(result);
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(_ctru_acu_get_wifi_status__doc__,
+"Gets the connected Wifi status.");
+
+static PyObject *
+_ctru_acu_get_wifi_status(PyObject *self, PyObject *args)
+{
+    Result result;
+    u32 out;
+
+    result = ACU_GetWifiStatus(&out);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return PyLong_FromUnsignedLong(out);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_status__doc__,
+"Gets the connected Wifi status.");
+
+static PyObject *
+_ctru_acu_get_status(PyObject *self, PyObject *args)
+{
+    Result result;
+    u32 out;
+
+    result = ACU_GetStatus(&out);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return PyLong_FromUnsignedLong(out);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_security_mode__doc__,
+"Gets the connected Wifi security mode.");
+
+static PyObject *
+_ctru_acu_get_security_mode(PyObject *self, PyObject *args)
+{
+    Result result;
+    acSecurityMode mode;
+
+    result = ACU_GetSecurityMode(&mode);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return Py_BuildValue("i", (int)mode);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_ssid__doc__,
+"Gets the connected Wifi SSID.");
+
+static PyObject *
+_ctru_acu_get_ssid(PyObject *self, PyObject *args)
+{
+    Result result;
+    const char *ssid;
+
+    result = ACU_GetSSID(ssid);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return Py_BuildValue("s#", ssid);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_ssid_length__doc__,
+"Gets the connected Wifi SSID length.");
+
+static PyObject *
+_ctru_acu_get_ssid_length(PyObject *self, PyObject *args)
+{
+    Result result;
+    u32 out;
+
+    result = ACU_GetSSIDLength(&out);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return PyLong_FromUnsignedLong(out);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_proxy_enable__doc__,
+"Determines whether proxy is enabled for the connected network.");
+
+static PyObject *
+_ctru_acu_get_proxy_enable(PyObject *self, PyObject *args)
+{
+    Result result;
+    bool enable;
+
+    result = ACU_GetProxyEnable(&enable);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return PyBool_FromLong(enable);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_proxy_port__doc__,
+"Gets the connected network's proxy port.");
+
+static PyObject *
+_ctru_acu_get_proxy_port(PyObject *self, PyObject *args)
+{
+    Result result;
+    u32 out;
+
+    result = ACU_GetProxyPort(&out);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return PyLong_FromUnsignedLong(out);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_proxy_user_name__doc__,
+"Gets the connected network's proxy username.");
+
+static PyObject *
+_ctru_acu_get_proxy_user_name(PyObject *self, PyObject *args)
+{
+    Result result;
+    char *username;
+
+    result = ACU_GetProxyUserName(username);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return Py_BuildValue("s", username);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_proxy_password__doc__,
+"Gets the connected network's proxy password.");
+
+static PyObject *
+_ctru_acu_get_proxy_password(PyObject *self, PyObject *args)
+{
+    Result result;
+    char *password;
+
+    result = ACU_GetProxyPassword(password);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return Py_BuildValue("s", password);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_last_error_code__doc__,
+"Gets the last error to occur during a connection.");
+
+static PyObject *
+_ctru_acu_get_last_error_code(PyObject *self, PyObject *args)
+{
+    Result result;
+    u32 error_code;
+
+    result = ACU_GetLastErrorCode(&error_code);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return PyLong_FromUnsignedLong(error_code);
+}
+
+PyDoc_STRVAR(_ctru_acu_get_last_detail_error_code__doc__,
+"Gets the last detailed error to occur during a connection.");
+
+static PyObject *
+_ctru_acu_get_last_detail_error_code(PyObject *self, PyObject *args)
+{
+    Result result;
+    u32 error_code;
+
+    result = ACU_GetLastDetailErrorCode(&error_code);
+    _CTRU_ASSERT_IPC_OK(result);
+
+    return PyLong_FromUnsignedLong(error_code);
+}
+
 /* hid */
 
 PyDoc_STRVAR(_ctru_hid_init__doc__,
@@ -263,6 +469,21 @@ _ctru_hiduser_get_sound_volume(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef _ctru_methods[] = {
+    /* ac */
+    {"ac_init", _ctru_ac_init, METH_NOARGS, _ctru_ac_init__doc__},
+    {"ac_exit", _ctru_ac_exit, METH_NOARGS, _ctru_ac_exit__doc__},
+    {"ac_wait_internet_connection", _ctru_ac_wait_internet_connection, METH_NOARGS, _ctru_ac_wait_internet_connection__doc__},
+    {"acu_get_wifi_status", _ctru_acu_get_wifi_status, METH_NOARGS, _ctru_acu_get_wifi_status__doc__},
+    {"acu_get_status", _ctru_acu_get_status, METH_NOARGS, _ctru_acu_get_status__doc__},
+    {"acu_get_security_mode", _ctru_acu_get_security_mode, METH_NOARGS, _ctru_acu_get_security_mode__doc__},
+    {"acu_get_ssid", _ctru_acu_get_ssid, METH_NOARGS, _ctru_acu_get_ssid__doc__},
+    {"acu_get_ssid_length", _ctru_acu_get_ssid_length, METH_NOARGS, _ctru_acu_get_ssid_length__doc__},
+    {"acu_get_proxy_enable", _ctru_acu_get_proxy_enable, METH_NOARGS, _ctru_acu_get_proxy_enable__doc__},
+    {"acu_get_proxy_port", _ctru_acu_get_proxy_port, METH_NOARGS, _ctru_acu_get_proxy_port__doc__},
+    {"acu_get_proxy_user_name", _ctru_acu_get_proxy_user_name, METH_NOARGS, _ctru_acu_get_proxy_user_name__doc__},
+    {"acu_get_proxy_password", _ctru_acu_get_proxy_password, METH_NOARGS, _ctru_acu_get_proxy_password__doc__},
+    {"acu_get_last_error_code", _ctru_acu_get_last_error_code, METH_NOARGS, _ctru_acu_get_proxy_password__doc__},
+    {"acu_get_last_detail_error_code", _ctru_acu_get_last_detail_error_code, METH_NOARGS, _ctru_acu_get_last_detail_error_code__doc__},
     /* hid */
     {"hid_init", _ctru_hid_init, METH_NOARGS, _ctru_hid_init__doc__},
     {"hid_exit", _ctru_hid_exit, METH_NOARGS, _ctru_hid_exit__doc__},
