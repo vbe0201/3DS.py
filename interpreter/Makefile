@@ -3,10 +3,9 @@
 #---------------------------------------------------------------------------------
 
 ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>/devkitARM")
 endif
 
-TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
 #---------------------------------------------------------------------------------
@@ -14,101 +13,98 @@ include $(DEVKITARM)/3ds_rules
 #---------------------------------------------------------------------------------
 ARCH     := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
-CFLAGS   := $(ARCH) -g -Wall -O2 -mword-relocations -ffunction-sections \
-			-Wno-strict-aliasing -fomit-frame-pointer -ffast-math
+CFLAGS   := -g -Wall -O2 -mword-relocations -ffunction-sections \
+			-Wno-strict-aliasing -fomit-frame-pointer -ffast-math \
+			$(ARCH)
+
+CFLAGS   += $(INCLUDE) -DARM11 -D_3DS
 
 CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
 
 ASFLAGS  := -g $(ARCH)
 
-LDFLAGS  =  -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS  = -specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+
+LIBS     := -lctru -lm -lz
 
 #---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
+# list of directories including libraries, this must be  the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-PATCH_DIR := ../python_patches
+LIBDIRS := $(CTRULIB) $(PORTLIBS)
 
-# Use gnu-sed if we're on macOS
+#---------------------------------------------------------------------------------
+# Python metainformation for the build process
+#---------------------------------------------------------------------------------
+
+# Set the Python version to compile.
+# Defaults to 3.6.9.
+PYTHON_VERSION ?= 3.6.9
+
+# Due to misleading newlib headers, these functions
+# get detected as present, even though they aren't.
+# They will be stubbed out in pyconfig.h.
+INVALID_CONFIG_ENTRIES := CHROOT FCHDIR FDATASYNC SETGROUPS SYMLINK
+
+# The name of the statically linked libpython that should be produced.
+LIBPYTHON = libpython$(shell echo $(PYTHON_VERSION) | cut -b 1-3).a
+
+# The local directory for the Python source tree.
+PYTHON_DIR = Python-$(PYTHON_VERSION)
+
+# The repository to retrieve the interpreter from.
+PYTHON_REPOSITORY = https://github.com/vbe0201/cpython
+
+# The repository branch that contains 3DS build patches.
+PYTHON_BRANCH = 3ds
+
+# The output directory for CPython compile results.
+PYTHON_OUT = cpython-3ds
+
+OUTDIR = libpython
+
+#---------------------------------------------------------------------------------
+# no real need to edit anything past this point unless you need to add additional
+# rules for Python cross-compilation
+#---------------------------------------------------------------------------------
+export INCLUDE   := $(foreach dir,$(LIBDIRS),-I$(dir)/include)
+
+export LIBPATHS  := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+
+# Use gnu-sed if user is on macOS.
 ifeq ($(UNAME_S),Darwin)
-	SED   := gsed
+	SED := gsed
 else
-	SED   := sed
+	SED := sed
 endif
 
-LIBDIRS	  := $(PORTLIBS) $(CTRULIB)
-
-export INCLUDE := $(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-                    -I$(CURDIR)/$(BUILD)
-
-CFLAGS   += $(INCLUDE) -DARM11 -D_3DS -DWITH_THREAD
-
-ifeq ($(strip $(PYVERSION)),)
-	PYVERSION := 3.6.9
-endif
-
-ANAME     := libpython$(shell echo $(PYVERSION) | cut -b 1-3).a
 #---------------------------------------------------------------------------------
-# PYDIR is the Python source directory
-# PYURL is the download URL for Python
-# OUTDIR is the output directory
-#---------------------------------------------------------------------------------
-PYDIR  := Python-$(PYVERSION)
-PYURL  := https://www.python.org/ftp/python/$(PYVERSION)/$(PYDIR).tgz
-OUTDIR := libpython
-
-#---------------------------------------------------------------------------------
-
 .PHONY: all clean
 
-all: distPython
+all: $(CURDIR)/$(OUTDIR)
 
-distPython: makePython
-	@[ -d "$(OUTDIR)" ] || mkdir -p $(OUTDIR)
-	@[ -d "$(OUTDIR)/include" ] || mkdir -p $(OUTDIR)/include
-	@[ -d "$(OUTDIR)/lib" ] || mkdir -p $(OUTDIR)/lib
-	cp $(ANAME) $(OUTDIR)/lib
-	cp -r $(PYDIR)/Include/* $(OUTDIR)/include
-	cp $(PYDIR)/pyconfig.h $(OUTDIR)/include
-	cd $(PYDIR)/Lib && zip -r ../../$(OUTDIR)/python_lib.zip .
+$(CURDIR)/$(OUTDIR): $(CURDIR)/$(PYTHON_DIR)/$(LIBPYTHON)
+	@mkdir -p $@
+	@mkdir -p $@/lib
+	cp -r $(CURDIR)/$(PYTHON_DIR)/Include $(CURDIR)/$(OUTDIR)/include
+	cp $(CURDIR)/$(PYTHON_DIR)/pyconfig.h $(CURDIR)/$(OUTDIR)/include/
+	cp $(CURDIR)/$(LIBPYTHON) $(CURDIR)/$(OUTDIR)/lib/
 
-makePython: patchPython
-	cd $(PYDIR) && \
-	$(MAKE) $(MAKEFLAGS) LIBRARY="$(ANAME)" LDLIBRARY="$(ANAME)" $(ANAME) && \
-	cd .. && \
-	cp $(PYDIR)/$(ANAME) .
+$(CURDIR)/$(PYTHON_DIR)/$(LIBPYTHON): $(CURDIR)/$(PYTHON_DIR)/Makefile
+	$(MAKE) $(MAKEFLAGS) -C $(CURDIR)/$(PYTHON_DIR) LIBRARY="$(LIBPYTHON)" LDLIBRARY="$(LIBPYTHON)" $(LIBPYTHON)
+	cp $(CURDIR)/$(PYTHON_DIR)/$(LIBPYTHON) .
 
-patchPython: configurePython
-	cp $(PATCH_DIR)/condvars_ctr.h $(PYDIR)/Python/
-	cp $(PATCH_DIR)/thread_ctr.h $(PYDIR)/Python/
-	patch $(PYDIR)/Python/fileutils.c $(PATCH_DIR)/fileutils.c.diff
-	patch $(PYDIR)/pyconfig.h $(PATCH_DIR)/pyconfig.h.diff
-	patch $(PYDIR)/Makefile $(PATCH_DIR)/Makefile.diff
-	patch $(PYDIR)/Modules/posixmodule.c $(PATCH_DIR)/posixmodule.c.diff
-	patch $(PYDIR)/Python/ceval_gil.h $(PATCH_DIR)/ceval_gil.h.diff
-	patch $(PYDIR)/Python/condvar.h $(PATCH_DIR)/condvar.h.diff
-	patch $(PYDIR)/Python/pytime.c $(PATCH_DIR)/pytime.c.diff
-	patch $(PYDIR)/Python/random.c $(PATCH_DIR)/random.c.diff
-	patch $(PYDIR)/Python/thread.c $(PATCH_DIR)/thread.c.diff
-	$(SED) -e 's/#_thread\s_threadmodule.c/_thread\s_threadmodule.c/g' $(PYDIR)/Modules/Setup.config
-	$(SED) -i '167s/_POSIX_THREADS/_3DS/' $(PYDIR)/Modules/_tracemalloc.c
-
-configurePython: preparePython
-	cd $(PYDIR) && \
+$(CURDIR)/$(PYTHON_DIR)/Makefile: $(CURDIR)/$(PYTHON_DIR)
+	cp $(CURDIR)/config.site $(PYTHON_DIR)/
+	cd $(PYTHON_DIR) && \
 	./configure CC="$(CC)" CXX="$(CXX)" AS="$(AS)" AR="$(AR)" OBJCOPY="$(OBJCOPY)" STRIP="$(STRIP)" NM="$(NM)" RANLIB="$(RANLIB)" \
-	  CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" ASFLAGS="$(ASFLAGS)" LDFLAGS="$(LDFLAGS)" CONFIG_SITE=config.site \
+	  CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" ASFLAGS="$(ASFLAGS)" LDFLAGS="$(LDFLAGS) $(LIBPATHS) $(LIBS)" CONFIG_SITE=config.site \
 	  --enable-optimizations --without-doc-strings --disable-shared --disable-ipv6 --host=arm-none-eabi --build=`./config.guess` && \
+	$(foreach opt,$(INVALID_CONFIG_ENTRIES),`$(SED) -i "s/#define HAVE_$(opt) 1/\/* #undef HAVE_$(opt) *\//" pyconfig.h`) && \
 	cd ..
 
-preparePython: $(PYDIR)
-	$(SED) -i -e 's/\*\-\*\-linux\*)/\*\-\*\-linux\*\|arm\-none\-eabi)/g' $(PYDIR)/configure
-	cp $(PATCH_DIR)/config.site $(PYDIR)/
-	cp -r $(PATCH_DIR)/_ctru $(PYDIR)/Modules/
-	cp $(PATCH_DIR)/Setup.dist $(PYDIR)/Modules/
-
-$(PYDIR):
-	wget $(PYURL) || curl -L $(PYURL)
-	tar xfzv $@.tgz
+$(CURDIR)/$(PYTHON_DIR):
+	git clone $(PYTHON_REPOSITORY) $(PYTHON_DIR) -b $(PYTHON_BRANCH)
 
 clean:
-	@rm -rf $(OUTDIR) $(PYDIR) $(PYDIR).tgz libpython*.a
+	rm -rf $(OUTDIR) $(PYTHON_DIR) libpython*.a
