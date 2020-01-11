@@ -1,9 +1,15 @@
+#include <malloc.h>
 #include <stdio.h>
 #include <3ds.h>
 
 #include "Python.h"
 
 #define MAIN_PY "main.py"
+
+#define SOC_ALIGN 0x1000
+#define SOC_BUFFERSIZE 0x100000
+
+static u32 *socket_buffer = NULL;
 
 int main(int argc, char *argv[])
 {
@@ -49,13 +55,27 @@ int main(int argc, char *argv[])
     PyObject *sys_path = PySys_GetObject("path");
     PyList_Insert(sys_path, 0, path);
 
+    /* Allocate a buffer for the SOC service. */
+    socket_buffer = (u32 *)memalign(SOC_ALIGN, SOC_BUFFERSIZE);
+    if (socket_buffer == NULL) {
+        printf("Failed to allocate the socket buffer.\n");
+        goto end;
+    }
+
+    /* Initialize the SOC service. */
+    if (R_FAILED(socInit(socket_buffer, SOC_BUFFERSIZE))) {
+        printf("Failed to initialize the SOC service.\n");
+        goto end;
+    }
+
     /* Launch our script. */
     FILE *main_py = fopen(MAIN_PY, "r");
     if (main_py == NULL)
-        printf("Failed to open %s. Check if the file exists.", MAIN_PY);
+        printf("Failed to open %s. Check if the file exists.\n", MAIN_PY);
     else
         PyRun_AnyFile(main_py, MAIN_PY);
 
+end:
     Py_DECREF(path);
     Py_DECREF(sys_path);
 
@@ -74,6 +94,7 @@ int main(int argc, char *argv[])
         gspWaitForVBlank();
     }
 
+    socExit();
     gfxExit();
 
     return 0;
